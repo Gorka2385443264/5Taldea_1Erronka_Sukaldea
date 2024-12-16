@@ -1,0 +1,15 @@
+﻿<hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+	<session-factory>
+		<property name="connection.driver_class">NHibernate.Driver.SqlClientDriver</property>
+		<property name="connection.connection_string">
+			Server=localhost;Database=NombreDeTuBaseDeDatos;User Id=usuario;Password=contraseña;
+		</property>
+		<property name="dialect">NHibernate.Dialect.MsSql2012Dialect</property>
+		<property name="show_sql">true</property>
+		<property name="format_sql">true</property>
+		<property name="hbm2ddl.auto">update</property>
+
+		<!-- Mapear la clase Pedido -->
+		<mapping assembly="cocina" />
+	</session-factory>
+</hibernate-configuration>
