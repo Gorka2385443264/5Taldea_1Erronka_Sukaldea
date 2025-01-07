@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace cocina
 {
+    public class Platera { public virtual int Id { get; set; } public virtual string Izena { get; set; } public virtual string Deskribapena { get; set; } public virtual string Mota { get; set; } public virtual double Prezioa { get; set; } public virtual bool Menu { get; set; } public virtual DateTime CreatedAt { get; set; } public virtual DateTime UpdatedAt { get; set; } public virtual int CreatedBy { get; set; } public virtual int UpdatedBy { get; set; } public virtual DateTime? DeletedAt { get; set; } public virtual int? DeletedBy { get; set; } }
     public class Pedido
     {
-        public int Id { get; set; }
-        public int Mesa { get; set; }
-        public string Plato { get; set; }
-        public string Nota { get; set; }
-        public bool Preparando { get; set; }
-        public DateTime? Entregado { get; set; }
+        public virtual int Id { get; set; }
+        public virtual int Langile { get; set; }
+        public virtual int Mesa { get; set; }
+        public virtual string Nota { get; set; }
+        public virtual bool Preparando { get; set; }
+        public virtual bool Done { get; set; }
+        public virtual DateTime? DoneAt { get; set; }
+        public virtual Platera Plato { get; set; }
 
-        public void CrearPedido(Pedido nuevoPedido)
+        // Propiedad auxiliar para obtener el nombre del plato
+        public virtual string NombrePlato => Plato?.Izena ?? "No tiene plato";
+
+        public virtual void CrearPedido(Pedido nuevoPedido)
         {
             using (var session = NHibernateHelper.OpenSession())
             using (var transaction = session.BeginTransaction())
@@ -21,7 +28,7 @@ namespace cocina
             }
         }
 
-        public Pedido ObtenerPedidoPorId(int id)
+        public virtual Pedido ObtenerPedidoPorId(int id)
         {
             using (var session = NHibernateHelper.OpenSession())
             {
@@ -29,7 +36,7 @@ namespace cocina
             }
         }
 
-        public void ActualizarPedido(Pedido pedido)
+        public virtual void ActualizarPedido(Pedido pedido)
         {
             using (var session = NHibernateHelper.OpenSession())
             using (var transaction = session.BeginTransaction())
@@ -39,7 +46,8 @@ namespace cocina
             }
         }
 
-        public void EliminarPedido(int id)
+
+        public virtual void EliminarPedido(int id)
         {
             using (var session = NHibernateHelper.OpenSession())
             using (var transaction = session.BeginTransaction())
@@ -52,6 +60,5 @@ namespace cocina
                 }
             }
         }
-
     }
 }

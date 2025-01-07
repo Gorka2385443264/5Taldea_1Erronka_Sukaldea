@@ -1,5 +1,8 @@
 ﻿using NHibernate;
 using NHibernate.Cfg;
+using System;
+using System.Configuration;
+using System.Reflection;
 
 namespace cocina
 {
@@ -11,10 +14,22 @@ namespace cocina
         {
             if (_sessionFactory == null)
             {
-                var configuration = new Configuration();
-                configuration.Configure(); // Esto carga el archivo hibernate.cfg.xml
-                configuration.AddAssembly("cocina"); // Asegúrate de que el ensamblado es correcto
-                _sessionFactory = configuration.BuildSessionFactory();
+                var configuration = new NHibernate.Cfg.Configuration();
+                try
+                {
+                    configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionProvider, ConfigurationManager.AppSettings["hibernate.connection.provider"]);
+                    configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionDriver, ConfigurationManager.AppSettings["hibernate.connection.driver_class"]);
+                    configuration.SetProperty(NHibernate.Cfg.Environment.Dialect, ConfigurationManager.AppSettings["hibernate.dialect"]);
+                    configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, ConfigurationManager.ConnectionStrings["NHibernateConnection"].ConnectionString);
+
+                    configuration.AddAssembly(Assembly.GetExecutingAssembly());
+                    _sessionFactory = configuration.BuildSessionFactory();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("NHibernate configuration error: " + ex.Message);
+                    throw;
+                }
             }
             return _sessionFactory.OpenSession();
         }

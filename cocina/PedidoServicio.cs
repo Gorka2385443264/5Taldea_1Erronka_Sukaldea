@@ -6,12 +6,15 @@ namespace cocina
 {
     public class PedidoService
     {
-        public List<Pedido> ObtenerPedidos()
+        public IList<Pedido> ObtenerPedidosConPlatos()
         {
             using (var session = NHibernateHelper.OpenSession())
             {
-                return session.Query<Pedido>().ToList();
+                var query = session.CreateQuery("SELECT p FROM Pedido p LEFT JOIN FETCH p.Plato");
+                var pedidos = query.List<Pedido>();
+                return pedidos;
             }
         }
     }
+
 }

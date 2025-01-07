@@ -1,0 +1,13 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="cocina" namespace="cocina">
+	<class name="PedidoPlato" table="pedido_plato">
+		<id name="Id" column="id" type="int">
+			<generator class="native" />
+		</id>
+		<many-to-one name="Pedido" column="eskaera_id" class="cocina.Pedido" />
+		<many-to-one name="Platera" column="platera_id" class="cocina.Platera" />
+		<property name="NotaGehigarriak" column="nota_gehigarriak" type="string" />
+		<property name="EskaeraOrduna" column="eskaera_ordua" type="timestamp" />
+		<property name="AteratzeOrduna" column="ateratze_ordua" type="timestamp" />
+	</class>
+</hibernate-mapping>
+
