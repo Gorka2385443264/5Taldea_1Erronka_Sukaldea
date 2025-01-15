@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NHibernate.Mapping.ByCode;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,7 @@ namespace cocina
 {
     public partial class Main : Form
     {
+        sukaldeaController controller = new sukaldeaController();
         private bool isFullScreen = false;
         private FormBorderStyle previousFormBorderStyle;
         private FormWindowState previousWindowState;
@@ -19,9 +21,9 @@ namespace cocina
         private BindingSource bindingSource = new BindingSource();
 
         // Definimos los colores personalizados
-        private readonly Color primaryColor = ColorTranslator.FromHtml("#091725");
-        private readonly Color secondaryColor = ColorTranslator.FromHtml("#BA450D");
-        private readonly Color accentColor = ColorTranslator.FromHtml("#E89E47");
+        private readonly Color primaryColor = ColorTranslator.FromHtml("#212121");
+        private readonly Color secondaryColor = ColorTranslator.FromHtml("#3a3a3a");
+        private readonly Color accentColor = ColorTranslator.FromHtml("#ececec");
 
         public Main()
         {
@@ -30,6 +32,8 @@ namespace cocina
             this.SizeChanged += new EventHandler(Form_SizeChanged);
             this.Load += new EventHandler(Main_Load);
             this.KeyDown += new KeyEventHandler(Main_KeyDown);
+
+            dataGridView1.CellMouseClick += new DataGridViewCellMouseEventHandler(dataGridView1_CellMouseClick);
 
             // Aplicar colores personalizados al formulario
             this.BackColor = primaryColor;
@@ -44,9 +48,6 @@ namespace cocina
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.RowHeadersVisible = false;
 
-            // Configuración de pantalla completa
-            ToggleFullScreen();
-
             // Configuración del DataGridView (continuación)
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Columns.Clear();
@@ -58,67 +59,80 @@ namespace cocina
             dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = secondaryColor;
             dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = accentColor;
 
-            // Configurar columnas del DataGridView
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Número Pedido",
-                DataPropertyName = "Id",
-                ReadOnly = true
-            });
+            // Hacer que el color de selección sea transparente
+            dataGridView1.DefaultCellStyle.SelectionBackColor = Color.Transparent;
+            dataGridView1.DefaultCellStyle.SelectionForeColor = Color.Transparent;
+            dataGridView1.RowsDefaultCellStyle.SelectionBackColor = Color.Transparent;
+            dataGridView1.RowsDefaultCellStyle.SelectionForeColor = Color.Transparent;
 
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Plato",
-                DataPropertyName = "NombrePlato",
-                ReadOnly = true
-            });
+            dataGridView1.EnableHeadersVisualStyles = false; // Asegurar que los colores personalizados se apliquen
 
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+            // Configurar columnas del DataGridView solo si no se han agregado antes
+            if (dataGridView1.Columns.Count == 0)
             {
-                HeaderText = "Nota",
-                DataPropertyName = "Nota",
-                ReadOnly = false
-            });
+                dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Nº PEDIDO",
+                    DataPropertyName = "Mesa",
+                    ReadOnly = true
+                });
 
-            var preparandocolumn = new DataGridViewCheckBoxColumn
-            {
-                HeaderText = "Preparando",
-                DataPropertyName = "Preparando",
-                Name = "egoera",
-                ReadOnly = false,
-                CellTemplate = new CustomDataGridViewCheckBoxCell()
-            };
-            dataGridView1.Columns.Add(preparandocolumn);
+                dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "PLATO",
+                    DataPropertyName = "NombrePlato",
+                    ReadOnly = true
+                });
 
-            var donecolumn = new DataGridViewCheckBoxColumn
-            {
-                HeaderText = "Entregado",
-                DataPropertyName = "Done",
-                Name = "done",
-                ReadOnly = false,
-                CellTemplate = new CustomDataGridViewCheckBoxCell()
-            };
-            dataGridView1.Columns.Add(donecolumn);
+                dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "NOTA",
+                    DataPropertyName = "Nota",
+                    ReadOnly = false
+                });
 
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Fecha Entregado",
-                DataPropertyName = "DoneAt",
-                Name = "done_at",
-                ReadOnly = true
-            });
+                var preparandocolumn = new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "PREPARADO",
+                    DataPropertyName = "Preparando",
+                    Name = "egoera",
+                    ReadOnly = false,
+                    CellTemplate = new CustomDataGridViewCheckBoxCell()
+                };
+                dataGridView1.Columns.Add(preparandocolumn);
+
+                var donecolumn = new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "ENTREGADO",
+                    DataPropertyName = "Done",
+                    Name = "done",
+                    ReadOnly = false,
+                    CellTemplate = new CustomDataGridViewCheckBoxCell()
+                };
+                dataGridView1.Columns.Add(donecolumn);
+
+                dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "FECHA DE ENTREGA",
+                    DataPropertyName = "DoneAt",
+                    Name = "done_at",
+                    ReadOnly = true
+                });
+                dataGridView1.Columns["done_at"].Visible = false;
+            }
 
             dataGridView1.DataSource = bindingSource;
             dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
             dataGridView1.CurrentCellDirtyStateChanged += dataGridView1_CurrentCellDirtyStateChanged;
 
             RefreshDataGrid();
+            ToggleFullScreen();
             Form_SizeChanged(sender, e);
         }
 
+
         private void Form_SizeChanged(object sender, EventArgs e)
         {
-            // Ajustar la altura de las filas en función del tamaño del formulario
             int rowHeight = this.Height / 20;
             dataGridView1.RowTemplate.Height = rowHeight;
 
@@ -127,58 +141,64 @@ namespace cocina
                 row.Height = rowHeight;
             }
 
-            // Ajustar el tamaño de la fuente en función del tamaño del formulario
             float fontSize = Math.Max(10, this.Width / 100.0f);
-            Font newFont = new Font("Arial", fontSize);
+            Font newFont = new Font("Roboto", fontSize);
             dataGridView1.DefaultCellStyle.Font = newFont;
+            dataGridView1.DefaultCellStyle.ForeColor = accentColor;
             dataGridView1.ColumnHeadersDefaultCellStyle.Font = newFont;
+            dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = accentColor;
+            dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = secondaryColor;
             dataGridView1.RowHeadersDefaultCellStyle.Font = newFont;
+            dataGridView1.RowHeadersDefaultCellStyle.ForeColor = accentColor;
 
             dataGridView1.Refresh();
         }
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex >= 0 && e.RowIndex < dataGridView1.Rows.Count && e.ColumnIndex >= 0)
             {
-                if (dataGridView1.Rows[e.RowIndex].DataBoundItem is Pedido pedidoEditado)
+                try
                 {
-                    int pedidoId = pedidoEditado.Id;
-                    var pedido = new Pedido().ObtenerPedidoPorId(pedidoId);
-
-                    if (pedido != null)
+                    if (dataGridView1.Rows[e.RowIndex].DataBoundItem is Pedido pedidoEditado)
                     {
-                        if (e.ColumnIndex == dataGridView1.Columns["egoera"].Index)
-                        {
-                            pedido.Preparando = !pedido.Preparando;
-                        }
-                        else if (e.ColumnIndex == dataGridView1.Columns["done"].Index)
-                        {
-                            pedido.Done = !pedido.Done;
-                            if (pedido.Done)
-                            {
-                                pedido.DoneAt = DateTime.Now;
-                            }
-                            else
-                            {
-                                pedido.DoneAt = null;
-                            }
-                        }
+                        int pedidoId = pedidoEditado.Id;
+                        var pedido = new Pedido().ObtenerPedidoPorId(pedidoId);
 
-                        using (var session = NHibernateHelper.OpenSession())
+                        if (pedido != null)
                         {
-                            using (var transaction = session.BeginTransaction())
-                            {
-                                session.Update(pedido);
-                                transaction.Commit();
-                            }
-                        }
+                            int egoeraIndex = dataGridView1.Columns["egoera"]?.Index ?? -1;
+                            int doneIndex = dataGridView1.Columns["done"]?.Index ?? -1;
 
-                        RefreshDataGrid();
+                            if (egoeraIndex != -1 && e.ColumnIndex == egoeraIndex)
+                            {
+                                pedido.Preparando = Convert.ToBoolean(dataGridView1[e.ColumnIndex, e.RowIndex].Value);
+                            }
+                            else if (doneIndex != -1 && e.ColumnIndex == doneIndex)
+                            {
+                                pedido.Done = Convert.ToBoolean(dataGridView1[e.ColumnIndex, e.RowIndex].Value);
+                                if (pedido.Done)
+                                {
+                                    pedido.DoneAt = DateTime.Now;
+                                }
+                                else
+                                {
+                                    pedido.DoneAt = null;
+                                }
+                            }
+                            controller.HacerTransaccion(pedido);
+                            RefreshDataGrid();
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    // Aquí podrías manejar la excepción si es necesario
+                    Console.WriteLine("Error: " + ex.Message);
                 }
             }
         }
+
 
         private void dataGridView1_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
@@ -188,41 +208,23 @@ namespace cocina
             }
         }
 
-        public class CustomDataGridViewCheckBoxCell : DataGridViewCheckBoxCell
-        {
-            protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
-            {
-                base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value, formattedValue, errorText, cellStyle, advancedBorderStyle, paintParts);
-
-                Size checkBoxSize = new Size(cellBounds.Height - 4, cellBounds.Height - 4);
-                Point checkBoxLocation = new Point(cellBounds.X + (cellBounds.Width - checkBoxSize.Width) / 2, cellBounds.Y + (cellBounds.Height - checkBoxSize.Height) / 2);
-
-                ControlPaint.DrawCheckBox(graphics, new Rectangle(checkBoxLocation, checkBoxSize), GetCheckBoxState(value));
-            }
-
-            private ButtonState GetCheckBoxState(object value)
-            {
-                if (value == null || value == DBNull.Value)
-                    return ButtonState.Normal;
-
-                bool isChecked = Convert.ToBoolean(value);
-                return isChecked ? ButtonState.Checked : ButtonState.Normal;
-            }
-        }
-
         private void RefreshDataGrid()
         {
             var servicio = new PedidoService();
             var pedidos = servicio.ObtenerPedidosConPlatos();
+            bindingSource.DataSource = null;
 
             bindingSource.DataSource = pedidos;
 
             dataGridView1.Invoke((MethodInvoker)delegate
             {
+                dataGridView1.DataSource = null;
                 dataGridView1.DataSource = bindingSource;
+
                 dataGridView1.Refresh();
             });
         }
+
 
         private void Main_KeyDown(object sender, KeyEventArgs e)
         {
@@ -250,6 +252,73 @@ namespace cocina
                 this.WindowState = previousWindowState;
                 this.TopMost = false;
                 isFullScreen = false;
+            }
+        }
+
+        public class CustomDataGridViewCheckBoxCell : DataGridViewCheckBoxCell
+        {
+            private readonly Color checkBoxFillColor = ColorTranslator.FromHtml("#212121");
+            private readonly Color checkBoxTickColor = ColorTranslator.FromHtml("#ececec");
+
+            protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
+            {
+                base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value, formattedValue, errorText, cellStyle, advancedBorderStyle, paintParts);
+
+                // Hacer que el checkbox ocupe toda la celda
+                Size checkBoxSize = new Size(cellBounds.Width - 1, cellBounds.Height - 1);
+                Point checkBoxLocation = new Point(cellBounds.X, cellBounds.Y);
+
+                using (Brush fillBrush = new SolidBrush(checkBoxFillColor))
+                {
+                    graphics.FillRectangle(fillBrush, new Rectangle(checkBoxLocation, checkBoxSize));
+                }
+
+                if (Convert.ToBoolean(value))
+                {
+                    using (Pen tickPen = new Pen(checkBoxTickColor, 2)) // Ajustar el grosor del tick
+                    {
+                        PointF[] tickPoints = new PointF[]
+                        {
+                    new PointF(checkBoxLocation.X + checkBoxSize.Width * 0.2f, checkBoxLocation.Y + checkBoxSize.Height * 0.5f),
+                    new PointF(checkBoxLocation.X + checkBoxSize.Width * 0.4f, checkBoxLocation.Y + checkBoxSize.Height * 0.75f),
+                    new PointF(checkBoxLocation.X + checkBoxSize.Width * 0.8f, checkBoxLocation.Y + checkBoxSize.Height * 0.3f)
+                        };
+
+                        graphics.DrawLines(tickPen, tickPoints);
+                    }
+                }
+            }
+        }
+        private void dataGridView1_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var preparingColumnIndex = dataGridView1.Columns["egoera"]?.Index ?? -1;
+                var doneColumnIndex = dataGridView1.Columns["done"]?.Index ?? -1;
+
+                if (e.ColumnIndex == preparingColumnIndex)
+                {
+                    dataGridView1.BeginEdit(true);
+                    var currentValue = Convert.ToBoolean(dataGridView1[e.ColumnIndex, e.RowIndex].Value);
+                    dataGridView1[e.ColumnIndex, e.RowIndex].Value = !currentValue;
+                    dataGridView1.EndEdit();
+                }
+                else if (e.ColumnIndex == doneColumnIndex)
+                {
+                    var isPreparingChecked = Convert.ToBoolean(dataGridView1[preparingColumnIndex, e.RowIndex].Value);
+                    if (isPreparingChecked)
+                    {
+                        dataGridView1.BeginEdit(true);
+                        var currentValue = Convert.ToBoolean(dataGridView1[e.ColumnIndex, e.RowIndex].Value);
+                        dataGridView1[e.ColumnIndex, e.RowIndex].Value = !currentValue;
+                        dataGridView1.EndEdit();
+                    }
+                    else
+                    {
+                        // Mostrar un mensaje de advertencia o realizar alguna acción
+                        MessageBox.Show("Debes activar la casilla 'Preparando' antes de marcar 'Entregado'.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
             }
         }
     }
