@@ -10,7 +10,7 @@ namespace cocina
         {
             using (var session = NHibernateHelper.OpenSession())
             {
-                var query = session.CreateQuery("SELECT p FROM Pedido p LEFT JOIN FETCH p.Plato WHERE done_at = NULL");
+                var query = session.CreateQuery("SELECT p FROM Pedido p LEFT JOIN FETCH p.Plato WHERE done IS 0");
                 var pedidos = query.List<Pedido>();
                 return pedidos;
             }

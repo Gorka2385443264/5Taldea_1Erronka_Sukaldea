@@ -3,7 +3,23 @@ using System.Collections.Generic;
 
 namespace cocina
 {
-    public class Platera { public virtual int Id { get; set; } public virtual string Izena { get; set; } public virtual string Deskribapena { get; set; } public virtual string Mota { get; set; } public virtual double Prezioa { get; set; } public virtual bool Menu { get; set; } public virtual DateTime CreatedAt { get; set; } public virtual DateTime UpdatedAt { get; set; } public virtual int CreatedBy { get; set; } public virtual int UpdatedBy { get; set; } public virtual DateTime? DeletedAt { get; set; } public virtual int? DeletedBy { get; set; } }
+    public class Platera
+    {
+        public virtual int Id { get; set; }
+        public virtual string Izena { get; set; }
+        public virtual string Deskribapena { get; set; }
+        public virtual string Mota { get; set; }
+        public virtual string Platera_mota { get; set; }
+        public virtual double Prezioa { get; set; }
+        public virtual bool Menu { get; set; }
+        public virtual DateTime CreatedAt { get; set; }
+        public virtual DateTime UpdatedAt { get; set; }
+        public virtual int CreatedBy { get; set; }
+        public virtual int UpdatedBy { get; set; }
+        public virtual DateTime? DeletedAt { get; set; }
+        public virtual int? DeletedBy { get; set; }
+    }
+
     public class Pedido
     {
         public virtual int Id { get; set; }
@@ -13,10 +29,12 @@ namespace cocina
         public virtual bool Preparando { get; set; }
         public virtual bool Done { get; set; }
         public virtual DateTime? DoneAt { get; set; }
+        public virtual DateTime? EskaeraOrdua { get; set; }
         public virtual Platera Plato { get; set; }
+        public virtual string Egoera { get; set; }
 
-        // Propiedad auxiliar para obtener el nombre del plato
-        public virtual string NombrePlato => Plato?.Izena ?? "No tiene plato";
+    // Propiedad auxiliar para obtener el nombre del plato
+    public virtual string NombrePlato => Plato?.Izena ?? "No tiene plato";
 
         public virtual void CrearPedido(Pedido nuevoPedido)
         {

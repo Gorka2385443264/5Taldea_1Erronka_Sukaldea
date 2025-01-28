@@ -6,13 +6,14 @@
 		<property name="Izena" column="izena" type="string" />
 		<property name="Deskribapena" column="deskribapena" type="string" />
 		<property name="Mota" column="mota" type="string" />
+		<property name="Platera_mota" column="platera_mota" type="string" />
 		<property name="Prezioa" column="prezioa" type="double" />
 		<property name="Menu" column="menu" type="bool" />
-		<property name="CreatedAt" column="created_at" type="timestamp" />
-		<property name="UpdatedAt" column="updated_at" type="timestamp" />
+		<property name="CreatedAt" column="created_at" type="datetime" />
+		<property name="UpdatedAt" column="updated_at" type="datetime" />
 		<property name="CreatedBy" column="created_by" type="int" />
 		<property name="UpdatedBy" column="updated_by" type="int" />
-		<property name="DeletedAt" column="deleted_at" type="timestamp" />
+		<property name="DeletedAt" column="deleted_at" type="datetime" />
 		<property name="DeletedBy" column="deleted_by" type="int" />
 	</class>
 </hibernate-mapping>

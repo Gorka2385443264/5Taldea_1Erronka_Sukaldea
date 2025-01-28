@@ -17,10 +17,11 @@ namespace cocina
         private bool isFullScreen = false;
         private FormBorderStyle previousFormBorderStyle;
         private FormWindowState previousWindowState;
+        private Timer updateTimer;
 
         private BindingSource bindingSource = new BindingSource();
 
-        // Definimos los colores personalizados
+        // Colores de la app
         private readonly Color primaryColor = ColorTranslator.FromHtml("#212121");
         private readonly Color secondaryColor = ColorTranslator.FromHtml("#3a3a3a");
         private readonly Color accentColor = ColorTranslator.FromHtml("#ececec");
@@ -28,6 +29,7 @@ namespace cocina
         public Main()
         {
             InitializeComponent();
+            InitializeTimer();
             this.KeyPreview = true;
             this.SizeChanged += new EventHandler(Form_SizeChanged);
             this.Load += new EventHandler(Main_Load);
@@ -35,9 +37,22 @@ namespace cocina
 
             dataGridView1.CellMouseClick += new DataGridViewCellMouseEventHandler(dataGridView1_CellMouseClick);
 
-            // Aplicar colores personalizados al formulario
             this.BackColor = primaryColor;
             this.ForeColor = accentColor;
+        }
+
+        private void InitializeTimer()
+        {
+            updateTimer = new Timer();
+            updateTimer.Interval = 10000; // Intervalo de 10 segundos
+            updateTimer.Tick += UpdateTimer_Tick;
+            updateTimer.Start();
+        }
+
+        private void UpdateTimer_Tick(object sender, EventArgs e)
+        {
+            RefreshDataGrid();
+            Console.WriteLine("Tabla actualizada automaticamente");
         }
 
         private void Main_Load(object sender, EventArgs e)
@@ -47,8 +62,6 @@ namespace cocina
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.RowHeadersVisible = false;
-
-            // Configuración del DataGridView (continuación)
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Columns.Clear();
 
@@ -67,7 +80,6 @@ namespace cocina
 
             dataGridView1.EnableHeadersVisualStyles = false; // Asegurar que los colores personalizados se apliquen
 
-            // Configurar columnas del DataGridView solo si no se han agregado antes
             if (dataGridView1.Columns.Count == 0)
             {
                 dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
@@ -126,8 +138,8 @@ namespace cocina
             dataGridView1.CurrentCellDirtyStateChanged += dataGridView1_CurrentCellDirtyStateChanged;
 
             RefreshDataGrid();
-            ToggleFullScreen();
             Form_SizeChanged(sender, e);
+            ToggleFullScreen();
         }
 
 
@@ -193,7 +205,6 @@ namespace cocina
                 }
                 catch (Exception ex)
                 {
-                    // Aquí podrías manejar la excepción si es necesario
                     Console.WriteLine("Error: " + ex.Message);
                 }
             }
@@ -275,7 +286,7 @@ namespace cocina
 
                 if (Convert.ToBoolean(value))
                 {
-                    using (Pen tickPen = new Pen(checkBoxTickColor, 2)) // Ajustar el grosor del tick
+                    using (Pen tickPen = new Pen(checkBoxTickColor, 2)) //grosor del tick
                     {
                         PointF[] tickPoints = new PointF[]
                         {
@@ -315,7 +326,6 @@ namespace cocina
                     }
                     else
                     {
-                        // Mostrar un mensaje de advertencia o realizar alguna acción
                         MessageBox.Show("Debes activar la casilla 'Preparando' antes de marcar 'Entregado'.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
