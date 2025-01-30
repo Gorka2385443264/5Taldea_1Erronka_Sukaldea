@@ -14,7 +14,7 @@ namespace cocina
     public partial class Main : Form
     {
         sukaldeaController controller = new sukaldeaController();
-        private bool isFullScreen = false;
+        private bool isFullScreen = true;
         private FormBorderStyle previousFormBorderStyle;
         private FormWindowState previousWindowState;
         private Timer updateTimer;
@@ -22,8 +22,8 @@ namespace cocina
         private BindingSource bindingSource = new BindingSource();
 
         // Colores de la app
-        private readonly Color primaryColor = ColorTranslator.FromHtml("#212121");
-        private readonly Color secondaryColor = ColorTranslator.FromHtml("#3a3a3a");
+        private readonly Color primaryColor = ColorTranslator.FromHtml("#091725");
+        private readonly Color secondaryColor = ColorTranslator.FromHtml("#BA450D");
         private readonly Color accentColor = ColorTranslator.FromHtml("#ececec");
 
         public Main()
@@ -268,7 +268,7 @@ namespace cocina
 
         public class CustomDataGridViewCheckBoxCell : DataGridViewCheckBoxCell
         {
-            private readonly Color checkBoxFillColor = ColorTranslator.FromHtml("#212121");
+            private readonly Color checkBoxFillColor = ColorTranslator.FromHtml("#091725");
             private readonly Color checkBoxTickColor = ColorTranslator.FromHtml("#ececec");
 
             protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
